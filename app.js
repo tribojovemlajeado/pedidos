@@ -1,25 +1,21 @@
 import "./products.js";
-import "./clients.js";
-import "./pdv.js";
-import "./finance.js";
 
-export let currentRole = "admin"; // temporário
+window.currentRole = "admin"; // temporário
 
 window.showSection = function (id) {
-  document.querySelectorAll(".section").forEach(s => s.style.display = "none");
+  document.querySelectorAll(".section").forEach(s => {
+    s.style.display = "none";
+  });
 
   const section = document.getElementById(id);
+  if (!section) return;
+
   section.style.display = "block";
 
-  if (id === "products") window.loadProductsUI();
-  if (id === "clients") window.loadClientsUI();
-  if (id === "pdv") window.loadPDVUI();
-  if (id === "finance") window.loadFinance();
+  if (id === "products" && window.loadProductsUI) {
+    window.loadProductsUI();
+  }
 };
 
-window.logout = function () {
-  window.location.href = "index.html";
-};
-
-// inicia no PDV
-showSection("pdv");
+// inicia em produtos para teste
+window.showSection("products");
