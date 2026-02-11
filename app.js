@@ -1,36 +1,25 @@
-import { supabase } from "./supabase-config.js";
+import "./products.js";
+import "./clients.js";
+import "./pdv.js";
+import "./finance.js";
 
-export let currentRole = null;
-
-async function init() {
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    window.location.href = "index.html";
-    return;
-  }
-
-  currentRole = user.user_metadata.role;
-
-  if (currentRole !== "admin") {
-    document.querySelectorAll(".admin-only").forEach(el => {
-      el.style.display = "none";
-    });
-  }
-
-  // 🔥 abre PDV por padrão
-  showSection("pdv");
-}
+export let currentRole = "admin"; // temporário
 
 window.showSection = function (id) {
-  document.querySelectorAll(".section").forEach(sec => {
-    sec.style.display = "none";
-  });
+  document.querySelectorAll(".section").forEach(s => s.style.display = "none");
 
   const section = document.getElementById(id);
-  if (section) {
-    section.style.display = "block";
-  }
+  section.style.display = "block";
+
+  if (id === "products") window.loadProductsUI();
+  if (id === "clients") window.loadClientsUI();
+  if (id === "pdv") window.loadPDVUI();
+  if (id === "finance") window.loadFinance();
 };
 
-init();
+window.logout = function () {
+  window.location.href = "index.html";
+};
+
+// inicia no PDV
+showSection("pdv");
