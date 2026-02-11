@@ -5,8 +5,103 @@
 body {
   margin: 0;
   font-family: Arial, sans-serif;
+  background: #f4f6f8;
 }
 
+/* TOPO */
+.topbar {
+  background: #000;
+  color: #fff;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.topbar button {
+  background: #fff;
+  color: #000;
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+/* MENU */
+.menu {
+  background: #222;
+  padding: 10px 20px;
+}
+
+.menu button {
+  margin-right: 10px;
+  background: #444;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+/* CONTEÚDO */
+main {
+  padding: 20px;
+}
+
+.section {
+  display: none;
+}
+
+/* CARDS */
+.card {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.card input {
+  padding: 8px;
+  flex: 1;
+}
+
+.card button {
+  padding: 8px 14px;
+  background: black;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+/* TABELA */
+table {
+  width: 100%;
+  background: white;
+  border-collapse: collapse;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+th {
+  background: #eee;
+  text-align: left;
+}
+
+th, td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.admin-only button {
+  background: #c00;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+/* LOGIN */
 .login-body {
   background: black;
   height: 100vh;
@@ -23,10 +118,6 @@ body {
   text-align: center;
 }
 
-.login-card h1 {
-  margin-bottom: 20px;
-}
-
 .login-card input {
   width: 100%;
   padding: 12px;
@@ -39,5 +130,4 @@ body {
   background: black;
   color: white;
   border: none;
-  cursor: pointer;
 }
