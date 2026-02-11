@@ -1,123 +1,46 @@
 import { supabase } from "./supabase-config.js";
 
-let cart = [];
-let products = [];
+window.loadPDVUI = async function () {
+  const section = document.getElementById("pdv");
 
-const productSelect = document.getElementById("pdv-product");
-const cartList = document.getElementById("cart-list");
-const totalSpan = document.getElementById("pdv-total");
-const clientSelect = document.getElementById("pdv-client");
+  section.innerHTML = `
+    <h2>PDV</h2>
+
+    <select id="product-select"></select>
+    <input id="qty" type="number" value="1">
+    <button onclick="addToCart()">Adicionar</button>
+
+    <ul id="cart"></ul>
+    <button onclick="finishSale()">Finalizar Venda</button>
+  `;
+
+  loadProducts();
+};
 
 async function loadProducts() {
-  const { data } = await supabase
-    .from("products")
-    .select("*")
-    .eq("active", true);
+  const select = document.getElementById("product-select");
+  select.innerHTML = "";
 
-  products = data || [];
-  productSelect.innerHTML = "";
+  const { data } = await supabase.from("products").select("*");
 
-  products.forEach(p => {
-    const opt = document.createElement("option");
-    opt.value = p.id;
-    opt.textContent = `${p.name} - R$ ${p.price}`;
-    productSelect.appendChild(opt);
+  data.forEach(p => {
+    select.innerHTML += `<option value="${p.id}">${p.name}</option>`;
   });
 }
 
-async function loadClients() {
-  const { data } = await supabase.from("clients").select("*");
-  data.forEach(c => {
-    const opt = document.createElement("option");
-    opt.value = c.id;
-    opt.textContent = c.name;
-    clientSelect.appendChild(opt);
-  });
-}
+let cart = [];
 
 window.addToCart = function () {
-  const productId = productSelect.value;
-  const qty = Number(document.getElementById("pdv-qty").value);
-
-  const product = products.find(p => p.id === productId);
-  if (!product || qty <= 0) return;
-
   cart.push({
-    product_id: product.id,
-    name: product.name,
-    quantity: qty,
-    price: product.price
+    product_id: document.getElementById("product-select").value,
+    quantity: document.getElementById("qty").value
   });
 
-  renderCart();
+  document.getElementById("cart").innerHTML =
+    cart.map(i => `<li>${i.quantity}</li>`).join("");
 };
 
-function renderCart() {
-  cartList.innerHTML = "";
-  let total = 0;
-
-  cart.forEach((item, i) => {
-    const itemTotal = item.quantity * item.price;
-    total += itemTotal;
-
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${item.name}</td>
-      <td>${item.quantity}</td>
-      <td>R$ ${item.price.toFixed(2)}</td>
-      <td>R$ ${itemTotal.toFixed(2)}</td>
-      <td><button onclick="removeItem(${i})">X</button></td>
-    `;
-    cartList.appendChild(tr);
-  });
-
-  totalSpan.textContent = total.toFixed(2);
-}
-
-window.removeItem = function (index) {
-  cart.splice(index, 1);
-  renderCart();
-};
-
-window.finalizeSale = async function () {
-  if (cart.length === 0) {
-    alert("Carrinho vazio");
-    return;
-  }
-
-  const payment = document.getElementById("pdv-payment").value;
-  if (!payment) {
-    alert("Selecione forma de pagamento");
-    return;
-  }
-
-  const total = Number(totalSpan.textContent);
-  const clientId = clientSelect.value || null;
-
-  const { data: sale } = await supabase.from("sales").insert([{
-    total,
-    payment_method: payment,
-    client_id: clientId
-  }]).select().single();
-
-  for (const item of cart) {
-    await supabase.from("sale_items").insert([{
-      sale_id: sale.id,
-      product_id: item.product_id,
-      quantity: item.quantity,
-      price: item.price
-    }]);
-
-    await supabase.rpc("decrement_stock", {
-      pid: item.product_id,
-      q: item.quantity
-    });
-  }
-
-  alert("Venda concluída com sucesso!");
+window.finishSale = async function () {
+  alert("Venda finalizada (mock)");
   cart = [];
-  renderCart();
 };
-
-loadProducts();
-loadClients();
