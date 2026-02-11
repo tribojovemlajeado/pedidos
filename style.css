@@ -101,6 +101,11 @@ th, td {
   cursor: pointer;
 }
 
+.admin-only {
+  display: inline-block;
+}
+
+
 /* LOGIN */
 .login-body {
   background: black;
