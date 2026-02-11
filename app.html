@@ -2,63 +2,27 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>TRIBO ERP</title>
+  <title>Sistema PDV</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<header class="topbar">
-  <h2>TRIBO ERP</h2>
-  <button onclick="logout()">SAIR</button>
-</header>
-
-<nav class="menu">
-  <button onclick="showSection('pdv')">PDV</button>
+<nav>
+  <button onclick="showSection('dashboard')">Dashboard</button>
   <button onclick="showSection('products')">Produtos</button>
   <button onclick="showSection('clients')">Clientes</button>
-  <button class="admin-only" onclick="showSection('finance')">Financeiro</button>
+  <button onclick="showSection('pdv')">PDV</button>
+  <button onclick="showSection('finance')">Financeiro</button>
 </nav>
 
 <main>
-
-  <!-- PDV -->
-  <section id="pdv" class="section"></section>
-
-  <!-- PRODUTOS -->
+  <section id="dashboard" class="section"></section>
   <section id="products" class="section"></section>
-
-  <!-- CLIENTES -->
   <section id="clients" class="section"></section>
-
-  <!-- FINANCEIRO -->
-  <section id="finance" class="section">
-    <h2>Financeiro</h2>
-
-    <div class="card">
-      <strong>Total Hoje: R$ <span id="total-day">0.00</span></strong>
-      <strong>Total Mês: R$ <span id="total-month">0.00</span></strong>
-    </div>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Data</th>
-          <th>Valor</th>
-          <th>Pagamento</th>
-          <th>Status</th>
-          <th class="admin-only">Ações</th>
-        </tr>
-      </thead>
-      <tbody id="sales-list"></tbody>
-    </table>
-  </section>
-
+  <section id="pdv" class="section"></section>
+  <section id="finance" class="section"></section>
 </main>
 
 <script type="module" src="app.js"></script>
-<script type="module" src="products.js"></script>
-<script type="module" src="clients.js"></script>
-<script type="module" src="pdv.js"></script>
-<script type="module" src="finance.js"></script>
 </body>
 </html>
