@@ -1,85 +1,58 @@
 import { supabase } from "./supabase-config.js";
-import { currentRole } from "./app.js";
 
-const list = document.getElementById("client-list");
+window.loadClientsUI = async function () {
+  const section = document.getElementById("clients");
+
+  section.innerHTML = `
+    <h2>Clientes</h2>
+
+    <div class="card">
+      <input id="c-name" placeholder="Nome">
+      <input id="c-phone" placeholder="Telefone">
+      <input id="c-email" placeholder="E-mail">
+      <input id="c-doc" placeholder="CPF/CNPJ">
+      <button onclick="saveClient()">Salvar Cliente</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Telefone</th>
+          <th>Email</th>
+        </tr>
+      </thead>
+      <tbody id="clients-list"></tbody>
+    </table>
+  `;
+
+  loadClients();
+};
 
 async function loadClients() {
-  const { data, error } = await supabase
-    .from("clients")
-    .select("*")
-    .order("created_at", { ascending: true }); // 🔥 não depende mais do client_code
-
-  if (error) {
-    console.error("Erro ao carregar clientes:", error);
-    return;
-  }
-
+  const list = document.getElementById("clients-list");
   list.innerHTML = "";
 
+  const { data } = await supabase.from("clients").select("*");
+
   data.forEach(c => {
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-      <td>${c.client_code ?? "-"}</td>
-      <td>${c.name}</td>
-      <td>${c.phone}</td>
-      <td>${c.email || ""}</td>
-      <td class="admin-only">
-        <button onclick="deleteClient('${c.id}')">Excluir</button>
-      </td>
+    list.innerHTML += `
+      <tr>
+        <td>${c.name}</td>
+        <td>${c.phone}</td>
+        <td>${c.email || ""}</td>
+      </tr>
     `;
-
-    list.appendChild(tr);
   });
-
-  if (currentRole !== "admin") {
-    document.querySelectorAll(".admin-only").forEach(el => {
-      el.style.display = "none";
-    });
-  }
 }
 
-window.addClient = async function () {
-  if (currentRole !== "admin") return;
-
-  const name = document.getElementById("c-name").value.trim();
-  const phone = document.getElementById("c-phone").value.trim();
-  const email = document.getElementById("c-email").value.trim();
-  const document = document.getElementById("c-doc").value.trim();
-
-  if (!name || !phone) {
-    alert("Nome e telefone são obrigatórios");
-    return;
-  }
-
-  const { error } = await supabase.from("clients").insert([{
-    name,
-    phone,
-    email: email || null,
-    document: document || null
-  }]);
-
-  if (error) {
-    console.error(error);
-    alert("Erro ao salvar cliente");
-    return;
-  }
-
-  document.getElementById("c-name").value = "";
-  document.getElementById("c-phone").value = "";
-  document.getElementById("c-email").value = "";
-  document.getElementById("c-doc").value = "";
+window.saveClient = async function () {
+  await supabase.from("clients").insert({
+    name: document.getElementById("c-name").value,
+    phone: document.getElementById("c-phone").value,
+    email: document.getElementById("c-email").value,
+    document: document.getElementById("c-doc").value
+  });
 
   loadClients();
 };
-
-window.deleteClient = async function (id) {
-  if (currentRole !== "admin") return;
-
-  if (!confirm("Deseja excluir este cliente?")) return;
-
-  await supabase.from("clients").delete().eq("id", id);
-  loadClients();
-};
-
-loadClients();
