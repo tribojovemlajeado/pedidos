@@ -62,10 +62,55 @@
   </section>
 
   <!-- PRODUTOS -->
-  <section id="products" class="section"></section>
+  <section id="products" class="section">
+    <h2>Produtos</h2>
+
+    <div class="card admin-only">
+      <input id="p-name" placeholder="Nome">
+      <input id="p-price" type="number" placeholder="Preço">
+      <input id="p-stock" type="number" placeholder="Estoque inicial">
+      <button onclick="addProduct()">Salvar Produto</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Preço</th>
+          <th>Disponível</th>
+          <th>Status</th>
+          <th class="admin-only">Ações</th>
+        </tr>
+      </thead>
+      <tbody id="product-list"></tbody>
+    </table>
+  </section>
 
   <!-- CLIENTES -->
-  <section id="clients" class="section"></section>
+  <section id="clients" class="section">
+    <h2>Clientes</h2>
+
+    <div class="card admin-only">
+      <input id="c-name" placeholder="Nome">
+      <input id="c-phone" placeholder="Telefone">
+      <input id="c-email" placeholder="E-mail (opcional)">
+      <input id="c-doc" placeholder="CPF/CNPJ (opcional)">
+      <button onclick="addClient()">Salvar Cliente</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Nome</th>
+          <th>Telefone</th>
+          <th>E-mail</th>
+          <th class="admin-only">Ações</th>
+        </tr>
+      </thead>
+      <tbody id="client-list"></tbody>
+    </table>
+  </section>
 
 </main>
 
