@@ -2,65 +2,39 @@ import { supabase } from "./supabase-config.js";
 import { currentRole } from "./app.js";
 
 /* =========================
-   UI PRINCIPAL
+   UI
 ========================= */
 window.loadProductsUI = async function () {
-  const section = document.getElementById("products");
+  const s = document.getElementById("products");
 
-  section.innerHTML = `
-    <h2>Produtos & Categorias</h2>
-
-    <div class="card">
-      <h3>Categorias</h3>
-
-      ${
-        currentRole === "admin"
-          ? `
-        <input id="cat-name" placeholder="Nova categoria">
-        <button onclick="addCategory()">Cadastrar</button>
-        `
-          : `<small>Apenas administradores gerenciam categorias</small>`
-      }
-
-      <ul id="category-list"></ul>
-    </div>
+  s.innerHTML = `
+    <h2>Produtos & Estoque</h2>
 
     <div class="card">
-      <h3>Novo Produto</h3>
-
-      <input id="p-name" placeholder="Nome do produto">
+      <h3>Produto</h3>
+      <input type="hidden" id="p-id">
+      <input id="p-name" placeholder="Nome">
       <input id="p-price" type="number" placeholder="Preço">
       <input id="p-stock" type="number" placeholder="Estoque inicial">
-
-      <select id="p-category">
-        <option value="">Selecione a categoria</option>
-      </select>
-
-      ${
-        currentRole === "admin"
-          ? `<button onclick="saveProduct()">Salvar Produto</button>`
-          : `<small>Apenas admin cadastra produtos</small>`
-      }
+      <select id="p-category"></select>
+      <button onclick="saveProduct()">Salvar</button>
     </div>
 
-    <h3>Lista de Produtos</h3>
     <table>
       <thead>
         <tr>
           <th>Produto</th>
           <th>Categoria</th>
-          <th>Preço</th>
-          <th>Estoque</th>
+          <th>Disponível</th>
+          <th>Reservado</th>
+          <th>Ações</th>
         </tr>
       </thead>
       <tbody id="products-list"></tbody>
     </table>
 
-    <div class="card">
-      <h3>Relatório: Vendas por Categoria</h3>
-      <button onclick="loadSalesByCategory()">Gerar Relatório</button>
-      <ul id="category-report"></ul>
-    </div>
+    <button onclick="exportCSV()">Exportar CSV</button>
+    <button onclick="exportExcel()">Exportar Excel</button>
   `;
 
   await loadCategories();
@@ -71,81 +45,18 @@ window.loadProductsUI = async function () {
    CATEGORIAS
 ========================= */
 async function loadCategories() {
-  const list = document.getElementById("category-list");
   const select = document.getElementById("p-category");
-
-  list.innerHTML = "";
-  select.innerHTML = `<option value="">Selecione a categoria</option>`;
+  select.innerHTML = "";
 
   const { data } = await supabase
     .from("categories")
     .select("*")
-    .eq("active", true)
-    .order("name");
+    .eq("active", true);
 
-  data.forEach(cat => {
-    // lista
-    const li = document.createElement("li");
-    li.innerHTML = `
-      ${cat.name}
-      ${
-        currentRole === "admin"
-          ? `
-        <button onclick="editCategory('${cat.id}','${cat.name}')">✏️</button>
-        <button onclick="disableCategory('${cat.id}')">❌</button>
-        `
-          : ""
-      }
-    `;
-    list.appendChild(li);
-
-    // select produto
-    const opt = document.createElement("option");
-    opt.value = cat.id;
-    opt.textContent = cat.name;
-    select.appendChild(opt);
+  data.forEach(c => {
+    select.innerHTML += `<option value="${c.id}">${c.name}</option>`;
   });
 }
-
-window.addCategory = async function () {
-  if (currentRole !== "admin") return;
-
-  const name = document.getElementById("cat-name").value.trim();
-  if (!name) return alert("Informe o nome");
-
-  const { error } = await supabase.from("categories").insert({ name });
-  if (error) return alert("Categoria já existe");
-
-  document.getElementById("cat-name").value = "";
-  loadCategories();
-};
-
-window.editCategory = async function (id, oldName) {
-  if (currentRole !== "admin") return;
-
-  const newName = prompt("Editar categoria", oldName);
-  if (!newName) return;
-
-  await supabase
-    .from("categories")
-    .update({ name: newName, updated_at: new Date() })
-    .eq("id", id);
-
-  loadCategories();
-};
-
-window.disableCategory = async function (id) {
-  if (currentRole !== "admin") return;
-
-  if (!confirm("Desativar categoria?")) return;
-
-  await supabase
-    .from("categories")
-    .update({ active: false, updated_at: new Date() })
-    .eq("id", id);
-
-  loadCategories();
-};
 
 /* =========================
    PRODUTOS
@@ -157,20 +68,25 @@ async function loadProducts() {
   const { data } = await supabase
     .from("products")
     .select(`
+      id,
       name,
-      price,
       stock_available,
-      categories ( name )
+      stock_reserved,
+      categories(name)
     `)
-    .order("name");
+    .eq("active", true);
 
   data.forEach(p => {
     list.innerHTML += `
       <tr>
         <td>${p.name}</td>
         <td>${p.categories?.name || "-"}</td>
-        <td>R$ ${Number(p.price).toFixed(2)}</td>
         <td>${p.stock_available}</td>
+        <td>${p.stock_reserved}</td>
+        <td>
+          <button onclick="editProduct('${p.id}')">✏️</button>
+          <button onclick="disableProduct('${p.id}')">❌</button>
+        </td>
       </tr>
     `;
   });
@@ -179,43 +95,91 @@ async function loadProducts() {
 window.saveProduct = async function () {
   if (currentRole !== "admin") return;
 
-  await supabase.from("products").insert({
-    name: document.getElementById("p-name").value,
-    price: document.getElementById("p-price").value,
-    stock_available: document.getElementById("p-stock").value,
-    category_id: document.getElementById("p-category").value || null
-  });
+  const id = document.getElementById("p-id").value;
+
+  const payload = {
+    name: p-name.value,
+    price: p-price.value,
+    stock_available: p-stock.value,
+    category_id: p-category.value
+  };
+
+  if (id) {
+    await supabase.from("products").update(payload).eq("id", id);
+  } else {
+    await supabase.from("products").insert(payload);
+  }
+
+  p-id.value = "";
+  p-name.value = "";
+  p-price.value = "";
+  p-stock.value = "";
+
+  loadProducts();
+};
+
+window.editProduct = async function (id) {
+  const { data } = await supabase
+    .from("products")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  p-id.value = data.id;
+  p-name.value = data.name;
+  p-price.value = data.price;
+  p-stock.value = data.stock_available;
+};
+
+window.disableProduct = async function (id) {
+  if (!confirm("Desativar produto?")) return;
+
+  await supabase
+    .from("products")
+    .update({ active: false })
+    .eq("id", id);
 
   loadProducts();
 };
 
 /* =========================
-   RELATÓRIO VENDAS POR CATEGORIA
+   EXPORTAÇÕES
 ========================= */
-window.loadSalesByCategory = async function () {
-  const report = document.getElementById("category-report");
-  report.innerHTML = "";
+window.exportCSV = async function () {
+  const { data } = await supabase.from("products").select("*");
 
-  const { data } = await supabase
-    .from("sale_items")
-    .select(`
-      quantity,
-      products (
-        categories ( name ),
-        price
-      )
-    `);
-
-  const resumo = {};
-
-  data.forEach(i => {
-    const cat = i.products?.categories?.name || "Sem categoria";
-    const total = i.quantity * i.products.price;
-
-    resumo[cat] = (resumo[cat] || 0) + total;
+  let csv = "Nome,Preço,Disponível,Reservado\n";
+  data.forEach(p => {
+    csv += `${p.name},${p.price},${p.stock_available},${p.stock_reserved}\n`;
   });
 
-  Object.entries(resumo).forEach(([cat, total]) => {
-    report.innerHTML += `<li>${cat}: R$ ${total.toFixed(2)}</li>`;
-  });
+  download(csv, "produtos.csv", "text/csv");
 };
+
+window.exportExcel = async function () {
+  const { data } = await supabase.from("products").select("*");
+
+  let xml = `
+  <table>
+    <tr><th>Nome</th><th>Preço</th><th>Disponível</th><th>Reservado</th></tr>
+    ${data.map(p =>
+      `<tr>
+        <td>${p.name}</td>
+        <td>${p.price}</td>
+        <td>${p.stock_available}</td>
+        <td>${p.stock_reserved}</td>
+      </tr>`
+    ).join("")}
+  </table>
+  `;
+
+  download(xml, "produtos.xls", "application/vnd.ms-excel");
+};
+
+function download(content, file, type) {
+  const blob = new Blob([content], { type });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = file;
+  a.click();
+}
