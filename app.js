@@ -17,11 +17,20 @@ async function init() {
       el.style.display = "none";
     });
   }
+
+  // 🔥 abre PDV por padrão
+  showSection("pdv");
 }
 
 window.showSection = function (id) {
-  document.querySelectorAll(".section").forEach(s => s.style.display = "none");
-  document.getElementById(id).style.display = "block";
+  document.querySelectorAll(".section").forEach(sec => {
+    sec.style.display = "none";
+  });
+
+  const section = document.getElementById(id);
+  if (section) {
+    section.style.display = "block";
+  }
 };
 
 init();
