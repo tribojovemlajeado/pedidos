@@ -1,64 +1,60 @@
 import { supabase } from "./supabase-config.js";
-import { currentRole } from "./app.js";
 
-const list = document.getElementById("product-list");
+window.loadProductsUI = async function () {
+  const section = document.getElementById("products");
+
+  section.innerHTML = `
+    <h2>Produtos</h2>
+
+    <div class="card">
+      <input id="p-name" placeholder="Nome">
+      <input id="p-price" type="number" placeholder="Preço">
+      <input id="p-stock" type="number" placeholder="Estoque inicial">
+      <button onclick="saveProduct()">Salvar Produto</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Preço</th>
+          <th>Estoque</th>
+        </tr>
+      </thead>
+      <tbody id="products-list"></tbody>
+    </table>
+  `;
+
+  loadProducts();
+};
 
 async function loadProducts() {
-  const { data } = await supabase.from("products").select("*").order("name");
+  const list = document.getElementById("products-list");
   list.innerHTML = "";
 
+  const { data } = await supabase.from("products").select("*");
+
   data.forEach(p => {
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-      <td>${p.name}</td>
-      <td>R$ ${p.price.toFixed(2)}</td>
-      <td>${p.stock_available}</td>
-      <td>${p.active ? "Ativo" : "Inativo"}</td>
-      <td class="admin-only">
-        <button onclick="toggleProduct('${p.id}', ${p.active})">Ativar/Desativar</button>
-      </td>
+    list.innerHTML += `
+      <tr>
+        <td>${p.name}</td>
+        <td>R$ ${Number(p.price).toFixed(2)}</td>
+        <td>${p.stock_available}</td>
+      </tr>
     `;
-
-    list.appendChild(tr);
   });
-
-  if (currentRole !== "admin") {
-    document.querySelectorAll(".admin-only").forEach(el => el.style.display = "none");
-  }
 }
 
-window.addProduct = async function () {
-  if (currentRole !== "admin") return;
-
+window.saveProduct = async function () {
   const name = document.getElementById("p-name").value;
-  const price = Number(document.getElementById("p-price").value);
-  const stock = Number(document.getElementById("p-stock").value);
+  const price = document.getElementById("p-price").value;
+  const stock = document.getElementById("p-stock").value;
 
-  if (!name || price <= 0) {
-    alert("Dados inválidos");
-    return;
-  }
-
-  await supabase.from("products").insert([{
+  await supabase.from("products").insert({
     name,
     price,
-    stock_available: stock,
-    stock_reserved: 0,
-    active: true
-  }]);
+    stock_available: stock
+  });
 
   loadProducts();
 };
-
-window.toggleProduct = async function (id, active) {
-  if (currentRole !== "admin") return;
-
-  await supabase.from("products")
-    .update({ active: !active })
-    .eq("id", id);
-
-  loadProducts();
-};
-
-loadProducts();
