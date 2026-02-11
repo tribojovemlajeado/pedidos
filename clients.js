@@ -7,10 +7,10 @@ async function loadClients() {
   const { data, error } = await supabase
     .from("clients")
     .select("*")
-    .order("client_code", { ascending: true });
+    .order("created_at", { ascending: true }); // 🔥 não depende mais do client_code
 
   if (error) {
-    console.error(error);
+    console.error("Erro ao carregar clientes:", error);
     return;
   }
 
@@ -20,7 +20,7 @@ async function loadClients() {
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
-      <td>${c.client_code}</td>
+      <td>${c.client_code ?? "-"}</td>
       <td>${c.name}</td>
       <td>${c.phone}</td>
       <td>${c.email || ""}</td>
@@ -33,7 +33,9 @@ async function loadClients() {
   });
 
   if (currentRole !== "admin") {
-    document.querySelectorAll(".admin-only").forEach(el => el.style.display = "none");
+    document.querySelectorAll(".admin-only").forEach(el => {
+      el.style.display = "none";
+    });
   }
 }
 
@@ -58,8 +60,8 @@ window.addClient = async function () {
   }]);
 
   if (error) {
-    alert("Erro ao salvar cliente");
     console.error(error);
+    alert("Erro ao salvar cliente");
     return;
   }
 
