@@ -7,12 +7,18 @@
 </head>
 <body>
 
-<nav>
-  <button onclick="showSection('dashboard')">Dashboard</button>
-  <button onclick="showSection('products')">Produtos</button>
-  <button onclick="showSection('clients')">Clientes</button>
-  <button onclick="showSection('pdv')">PDV</button>
-  <button onclick="showSection('finance')">Financeiro</button>
+<nav class="topbar">
+  <div class="logo">TRIBO ERP</div>
+
+  <div class="menu">
+    <button onclick="showSection('dashboard')">Dashboard</button>
+    <button onclick="showSection('products')">Produtos</button>
+    <button onclick="showSection('clients')">Clientes</button>
+    <button onclick="showSection('pdv')">PDV</button>
+    <button onclick="showSection('finance')">Financeiro</button>
+  </div>
+
+  <button class="logout" onclick="logout()">SAIR</button>
 </nav>
 
 <main>
@@ -82,3 +88,4 @@
 <script type="module" src="app.js"></script>
 </body>
 </html>
+
