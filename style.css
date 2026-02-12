@@ -26,6 +26,11 @@ body {
   cursor: pointer;
 }
 
+.hidden {
+  display: none;
+}
+
+
 /* MENU */
 .menu {
   background: #222;
