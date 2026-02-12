@@ -93,7 +93,9 @@
     <tbody id="clients-list"></tbody>
   </table>
 </section>
+  
 <!-- PDV -->
+
 <section id="pdv" class="section hidden">
   <h2>PDV</h2>
 
@@ -104,13 +106,24 @@
 
   <hr>
 
-  <label>Produto</label>
-  <select id="pdv-product"></select>
+  <h3>Produtos</h3>
 
-  <input id="pdv-qty" type="number" value="1" min="1">
-  <button onclick="addToCart()">Adicionar</button>
+  <table border="1" width="100%">
+    <thead>
+      <tr>
+        <th>Produto</th>
+        <th>Preço</th>
+        <th>Estoque</th>
+        <th>Qtd</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="pdv-products"></tbody>
+  </table>
 
   <hr>
+
+  <h3>Carrinho</h3>
 
   <table border="1" width="100%">
     <thead>
@@ -131,7 +144,6 @@
 </section>
 
 
-
 </main>
 
 <script type="module" src="auth.js"></script>
@@ -144,6 +156,7 @@
 
 </body>
 </html>
+
 
 
 
