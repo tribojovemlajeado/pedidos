@@ -1,59 +1,46 @@
 import { supabase } from './supabase-config.js'
 
 /* =========================
-   INIT
+   CATEGORIAS
 ========================= */
-document.addEventListener('DOMContentLoaded', () => {
-  loadCategories()
-  loadProducts()
-})
-
-/* =========================
-   CATEGORIES
-========================= */
-async function loadCategories() {
-  const categorySelect = document.getElementById('product-category')
-  const categoryList = document.getElementById('categories-list')
-
-  if (!categorySelect || !categoryList) {
-    console.warn('Elementos de categoria não encontrados')
-    return
-  }
-
+export async function loadCategories() {
   const { data, error } = await supabase
     .from('categories')
     .select('*')
-    .order('name', { ascending: true })
+    .order('name')
 
   if (error) {
     console.error('Erro ao carregar categorias:', error.message)
     return
   }
 
-  categorySelect.innerHTML = `<option value="">Selecione</option>`
-  categoryList.innerHTML = ''
+  const select = document.getElementById('product-category')
+  const list = document.getElementById('categories-list')
 
-  if (!data || data.length === 0) return
+  if (!select || !list) return
+
+  select.innerHTML = '<option value="">Selecione</option>'
+  list.innerHTML = ''
 
   data.forEach(cat => {
-    const option = document.createElement('option')
-    option.value = cat.id
-    option.textContent = cat.name
-    categorySelect.appendChild(option)
+    const opt = document.createElement('option')
+    opt.value = cat.id
+    opt.textContent = cat.name
+    select.appendChild(opt)
 
     const li = document.createElement('li')
     li.textContent = cat.name
-    categoryList.appendChild(li)
+    list.appendChild(li)
   })
 }
 
-async function saveCategory() {
-  const input = document.getElementById('category-name')
-  if (!input || !input.value.trim()) return
+window.saveCategory = async function () {
+  const name = document.getElementById('category-name').value.trim()
+  if (!name) return alert('Informe o nome da categoria')
 
   const { error } = await supabase
     .from('categories')
-    .insert([{ name: input.value.trim() }])
+    .insert({ name })
 
   if (error) {
     alert('Erro ao salvar categoria')
@@ -61,24 +48,21 @@ async function saveCategory() {
     return
   }
 
-  input.value = ''
+  document.getElementById('category-name').value = ''
   loadCategories()
 }
 
 /* =========================
-   PRODUCTS
+   PRODUTOS
 ========================= */
-async function loadProducts() {
-  const list = document.getElementById('products-list')
-  if (!list) return
-
+export async function loadProducts() {
   const { data, error } = await supabase
     .from('products')
     .select(`
       id,
       name,
       price,
-      stock,
+      stock_qty,
       categories ( name )
     `)
     .order('name')
@@ -88,41 +72,42 @@ async function loadProducts() {
     return
   }
 
+  const list = document.getElementById('products-list')
+  if (!list) return
+
   list.innerHTML = ''
 
-  if (!data || data.length === 0) return
-
-  data.forEach(prod => {
+  data.forEach(p => {
     const tr = document.createElement('tr')
     tr.innerHTML = `
-      <td>${prod.name}</td>
-      <td>R$ ${Number(prod.price).toFixed(2)}</td>
-      <td>${prod.stock}</td>
-      <td>${prod.categories?.name || '-'}</td>
+      <td>${p.name}</td>
+      <td>R$ ${Number(p.price).toFixed(2)}</td>
+      <td>${p.stock_qty}</td>
+      <td>${p.categories?.name || '-'}</td>
     `
     list.appendChild(tr)
   })
 }
 
-async function saveProduct() {
-  const name = document.getElementById('product-name')?.value
-  const price = document.getElementById('product-price')?.value
-  const stock = document.getElementById('product-stock')?.value
-  const category = document.getElementById('product-category')?.value
+window.saveProduct = async function () {
+  const name = document.getElementById('product-name').value.trim()
+  const price = Number(document.getElementById('product-price').value)
+  const stock_qty = Number(document.getElementById('product-stock').value)
+  const category_id = document.getElementById('product-category').value
 
-  if (!name || !price || !stock || !category) {
-    alert('Preencha todos os campos')
+  if (!name || !price) {
+    alert('Informe nome e preço')
     return
   }
 
   const { error } = await supabase
     .from('products')
-    .insert([{
+    .insert({
       name,
-      price: Number(price),
-      stock: Number(stock),
-      category_id: category
-    }])
+      price,
+      stock_qty,
+      category_id: category_id || null
+    })
 
   if (error) {
     alert('Erro ao salvar produto')
@@ -133,13 +118,14 @@ async function saveProduct() {
   document.getElementById('product-name').value = ''
   document.getElementById('product-price').value = ''
   document.getElementById('product-stock').value = ''
-  document.getElementById('product-category').value = ''
 
   loadProducts()
 }
 
 /* =========================
-   EXPORTS (HTML)
+   INIT
 ========================= */
-window.saveCategory = saveCategory
-window.saveProduct = saveProduct
+document.addEventListener('DOMContentLoaded', () => {
+  loadCategories()
+  loadProducts()
+})
