@@ -3,7 +3,7 @@ import { supabase } from './supabase-config.js'
 let cart = []
 
 /* =========================
-   CARREGAR PRODUTOS
+   CARREGAR PRODUTOS NA TELA
 ========================= */
 async function loadPDVProducts() {
   const { data, error } = await supabase
@@ -16,50 +16,65 @@ async function loadPDVProducts() {
     return
   }
 
-  const select = document.getElementById('pdv-product')
-  if (!select) return
+  const list = document.getElementById('pdv-products')
+  if (!list) return
 
-  select.innerHTML = '<option value="">Selecione</option>'
+  list.innerHTML = ''
 
   data.forEach(p => {
-    if (p.stock_qty > 0) {
-      const opt = document.createElement('option')
-      opt.value = p.id
-      opt.textContent = `${p.name} (Estoque: ${p.stock_qty})`
-      opt.dataset.price = p.price
-      opt.dataset.stock = p.stock_qty
-      select.appendChild(opt)
-    }
+    const tr = document.createElement('tr')
+    tr.innerHTML = `
+      <td>${p.name}</td>
+      <td>R$ ${Number(p.price).toFixed(2)}</td>
+      <td>${p.stock_qty}</td>
+      <td>
+        <input 
+          type="number" 
+          min="1" 
+          max="${p.stock_qty}" 
+          value="1" 
+          id="qty-${p.id}"
+          style="width:60px"
+        >
+      </td>
+      <td>
+        <button onclick="addToCart('${p.id}', '${p.name}', ${p.price}, ${p.stock_qty})">
+          Adicionar
+        </button>
+      </td>
+    `
+    list.appendChild(tr)
   })
 }
 
 /* =========================
    ADICIONAR AO CARRINHO
 ========================= */
-window.addToCart = function () {
-  const select = document.getElementById('pdv-product')
-  const qty = Number(document.getElementById('pdv-qty').value)
+window.addToCart = function (id, name, price, stock) {
+  const qtyInput = document.getElementById(`qty-${id}`)
+  const qty = Number(qtyInput.value)
 
-  if (!select.value || qty <= 0) {
-    alert('Selecione produto e quantidade')
+  if (!qty || qty <= 0) {
+    alert('Quantidade inválida')
     return
   }
-
-  const price = Number(select.selectedOptions[0].dataset.price)
-  const stock = Number(select.selectedOptions[0].dataset.stock)
 
   if (qty > stock) {
     alert('Estoque insuficiente')
     return
   }
 
-  const existing = cart.find(i => i.product_id === select.value)
+  const existing = cart.find(i => i.product_id === id)
   if (existing) {
+    if (existing.qty + qty > stock) {
+      alert('Estoque insuficiente')
+      return
+    }
     existing.qty += qty
   } else {
     cart.push({
-      product_id: select.value,
-      name: select.selectedOptions[0].text,
+      product_id: id,
+      name,
       price,
       qty
     })
@@ -88,7 +103,9 @@ function renderCart() {
       <td>${item.qty}</td>
       <td>R$ ${item.price.toFixed(2)}</td>
       <td>R$ ${subtotal.toFixed(2)}</td>
-      <td><button onclick="removeFromCart(${index})">X</button></td>
+      <td>
+        <button onclick="removeFromCart(${index})">X</button>
+      </td>
     `
     tbody.appendChild(tr)
   })
@@ -149,6 +166,7 @@ window.finishSale = async function () {
   }
 
   alert('Venda concluída com sucesso')
+
   cart = []
   renderCart()
   loadPDVProducts()
