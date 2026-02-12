@@ -67,21 +67,33 @@
 
   <!-- CLIENTES -->
   <section id="clients" class="section hidden">
-    <h2>Clientes</h2>
-    <p>Módulo em construção</p>
-  </section>
+  <h2>Clientes</h2>
 
-  <!-- PDV -->
-  <section id="pdv" class="section hidden">
-    <h2>PDV</h2>
-    <p>Módulo em construção</p>
-  </section>
+  <h3>Novo Cliente</h3>
 
-  <!-- FINANCEIRO -->
-  <section id="finance" class="section hidden">
-    <h2>Financeiro</h2>
-    <p>Módulo em construção</p>
-  </section>
+  <input id="client-name" placeholder="Nome">
+  <input id="client-phone" placeholder="Telefone">
+  <input id="client-email" placeholder="E-mail (opcional)">
+  <input id="client-document" placeholder="CPF/CNPJ (opcional)">
+
+  <button onclick="saveClient()">Salvar Cliente</button>
+
+  <hr>
+
+  <table border="1" width="100%">
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Nome</th>
+        <th>Telefone</th>
+        <th>E-mail</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody id="clients-list"></tbody>
+  </table>
+</section>
+
 
 </main>
 
@@ -90,5 +102,6 @@
 
 </body>
 </html>
+
 
 
