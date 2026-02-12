@@ -1,106 +1,145 @@
-import { supabase } from "./supabase-config.js";
-
-window.loadProductsUI = async function () {
-  const section = document.getElementById("products");
-
-  section.innerHTML = `
-    <h2>Produtos</h2>
-
-    <div class="card">
-      <h3>Novo Produto</h3>
-      <input id="p-name" placeholder="Nome">
-      <input id="p-price" type="number" placeholder="Preço">
-      <input id="p-stock" type="number" placeholder="Estoque">
-      <select id="p-category"></select>
-      <button onclick="saveProduct()">Salvar</button>
-    </div>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Produto</th>
-          <th>Categoria</th>
-          <th>Disponível</th>
-        </tr>
-      </thead>
-      <tbody id="products-list"></tbody>
-    </table>
-  `;
-
-  await loadCategories();
-  await loadProducts();
-};
+import { supabase } from './supabase-config.js'
 
 /* =========================
-   CATEGORIAS
+   INIT
+========================= */
+document.addEventListener('DOMContentLoaded', () => {
+  loadCategories()
+  loadProducts()
+})
+
+/* =========================
+   CATEGORIES
 ========================= */
 async function loadCategories() {
-  const select = document.getElementById("p-category");
-  select.innerHTML = `<option value="">Selecione</option>`;
+  const categorySelect = document.getElementById('product-category')
+  const categoryList = document.getElementById('categories-list')
 
-  const { data } = await supabase
-    .from("categories")
-    .select("*")
-    .eq("active", true)
-    .order("name");
+  if (!categorySelect || !categoryList) {
+    console.warn('Elementos de categoria não encontrados')
+    return
+  }
 
-  data.forEach(c => {
-    const opt = document.createElement("option");
-    opt.value = c.id;
-    opt.textContent = c.name;
-    select.appendChild(opt);
-  });
+  const { data, error } = await supabase
+    .from('categories')
+    .select('*')
+    .order('name', { ascending: true })
+
+  if (error) {
+    console.error('Erro ao carregar categorias:', error.message)
+    return
+  }
+
+  categorySelect.innerHTML = `<option value="">Selecione</option>`
+  categoryList.innerHTML = ''
+
+  if (!data || data.length === 0) return
+
+  data.forEach(cat => {
+    const option = document.createElement('option')
+    option.value = cat.id
+    option.textContent = cat.name
+    categorySelect.appendChild(option)
+
+    const li = document.createElement('li')
+    li.textContent = cat.name
+    categoryList.appendChild(li)
+  })
+}
+
+async function saveCategory() {
+  const input = document.getElementById('category-name')
+  if (!input || !input.value.trim()) return
+
+  const { error } = await supabase
+    .from('categories')
+    .insert([{ name: input.value.trim() }])
+
+  if (error) {
+    alert('Erro ao salvar categoria')
+    console.error(error)
+    return
+  }
+
+  input.value = ''
+  loadCategories()
 }
 
 /* =========================
-   PRODUTOS
+   PRODUCTS
 ========================= */
 async function loadProducts() {
-  const list = document.getElementById("products-list");
-  list.innerHTML = "";
+  const list = document.getElementById('products-list')
+  if (!list) return
 
-  const { data } = await supabase
-    .from("products")
+  const { data, error } = await supabase
+    .from('products')
     .select(`
+      id,
       name,
-      stock_available,
+      price,
+      stock,
       categories ( name )
     `)
-    .eq("active", true)
-    .order("name");
+    .order('name')
 
-  data.forEach(p => {
-    list.innerHTML += `
-      <tr>
-        <td>${p.name}</td>
-        <td>${p.categories?.name || "-"}</td>
-        <td>${p.stock_available}</td>
-      </tr>
-    `;
-  });
-}
-
-window.saveProduct = async function () {
-  const name = document.getElementById("p-name").value.trim();
-  const price = Number(document.getElementById("p-price").value);
-  const stock = Number(document.getElementById("p-stock").value);
-  const category = document.getElementById("p-category").value || null;
-
-  if (!name || price <= 0) {
-    alert("Dados inválidos");
-    return;
+  if (error) {
+    console.error('Erro ao carregar produtos:', error.message)
+    return
   }
 
-  await supabase.from("products").insert({
-    name,
-    price,
-    stock_available: stock,
-    category_id: category
-  });
+  list.innerHTML = ''
 
-  document.getElementById("p-name").value = "";
-  document.getElementById("p-price").value = "";
-  document.getElementById("p-stock").value = "";
+  if (!data || data.length === 0) return
 
-  loadProducts();
-};
+  data.forEach(prod => {
+    const tr = document.createElement('tr')
+    tr.innerHTML = `
+      <td>${prod.name}</td>
+      <td>R$ ${Number(prod.price).toFixed(2)}</td>
+      <td>${prod.stock}</td>
+      <td>${prod.categories?.name || '-'}</td>
+    `
+    list.appendChild(tr)
+  })
+}
+
+async function saveProduct() {
+  const name = document.getElementById('product-name')?.value
+  const price = document.getElementById('product-price')?.value
+  const stock = document.getElementById('product-stock')?.value
+  const category = document.getElementById('product-category')?.value
+
+  if (!name || !price || !stock || !category) {
+    alert('Preencha todos os campos')
+    return
+  }
+
+  const { error } = await supabase
+    .from('products')
+    .insert([{
+      name,
+      price: Number(price),
+      stock: Number(stock),
+      category_id: category
+    }])
+
+  if (error) {
+    alert('Erro ao salvar produto')
+    console.error(error)
+    return
+  }
+
+  document.getElementById('product-name').value = ''
+  document.getElementById('product-price').value = ''
+  document.getElementById('product-stock').value = ''
+  document.getElementById('product-category').value = ''
+
+  loadProducts()
+}
+
+/* =========================
+   EXPORTS (HTML)
+========================= */
+window.saveCategory = saveCategory
+window.saveProduct = saveProduct
