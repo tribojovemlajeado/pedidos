@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Sistema PDV</title>
+  <title>TRIBO ERP</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -16,11 +16,67 @@
 </nav>
 
 <main>
-  <section id="dashboard" class="section"></section>
-  <section id="products" class="section"></section>
-  <section id="clients" class="section"></section>
-  <section id="pdv" class="section"></section>
-  <section id="finance" class="section"></section>
+
+  <!-- DASHBOARD -->
+  <section id="dashboard" class="section">
+    <h2>Dashboard</h2>
+    <p>Bem-vindo ao TRIBO ERP</p>
+  </section>
+
+  <!-- PRODUTOS -->
+  <section id="products" class="section hidden">
+    <h2>Produtos</h2>
+
+    <h3>Categorias</h3>
+    <input id="category-name" placeholder="Nome da categoria">
+    <button onclick="saveCategory()">Salvar Categoria</button>
+
+    <ul id="categories-list"></ul>
+
+    <hr>
+
+    <h3>Novo Produto</h3>
+    <input id="product-name" placeholder="Nome do produto">
+    <input id="product-price" type="number" placeholder="Preço">
+    <input id="product-stock" type="number" placeholder="Estoque">
+
+    <select id="product-category">
+      <option value="">Selecione</option>
+    </select>
+
+    <button onclick="saveProduct()">Salvar Produto</button>
+
+    <table border="1" width="100%" style="margin-top:10px">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Preço</th>
+          <th>Estoque</th>
+          <th>Categoria</th>
+        </tr>
+      </thead>
+      <tbody id="products-list"></tbody>
+    </table>
+  </section>
+
+  <!-- CLIENTES -->
+  <section id="clients" class="section hidden">
+    <h2>Clientes</h2>
+    <p>Módulo em construção</p>
+  </section>
+
+  <!-- PDV -->
+  <section id="pdv" class="section hidden">
+    <h2>PDV</h2>
+    <p>Módulo em construção</p>
+  </section>
+
+  <!-- FINANCEIRO -->
+  <section id="finance" class="section hidden">
+    <h2>Financeiro</h2>
+    <p>Módulo em construção</p>
+  </section>
+
 </main>
 
 <script type="module" src="app.js"></script>
