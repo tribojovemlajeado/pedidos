@@ -94,6 +94,43 @@
   </table>
 </section>
 
+<section id="pdv" class="section hidden">
+  <h2>PDV</h2>
+
+  <label>Cliente (opcional)</label>
+  <select id="pdv-client">
+    <option value="">Venda sem cliente</option>
+  </select>
+
+  <hr>
+
+  <label>Produto</label>
+  <select id="pdv-product"></select>
+
+  <input id="pdv-qty" type="number" value="1" min="1">
+  <button onclick="addToCart()">Adicionar</button>
+
+  <hr>
+
+  <table border="1" width="100%">
+    <thead>
+      <tr>
+        <th>Produto</th>
+        <th>Qtd</th>
+        <th>Preço</th>
+        <th>Subtotal</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="pdv-cart"></tbody>
+  </table>
+
+  <h3>Total: R$ <span id="pdv-total">0.00</span></h3>
+
+  <button onclick="finishSale()">Finalizar Venda</button>
+</section>
+
+
 
 </main>
 
@@ -105,6 +142,7 @@
 
 </body>
 </html>
+
 
 
 
